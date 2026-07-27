@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TMS Staff Resources</title>
+<meta name="description" content="TMS Staff Resources — Work Schedules, Organization Chart, and Directory — The Minerals, Metals &amp; Materials Society" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="page-frame">
+  <div class="container">
+    <div class="unified-container" id="unifiedContainer">
+
+      <!-- Header -->
+      <div class="header-section">
+        <div class="header-left">
+          <img src="assets/tms-logo.png" alt="TMS" class="tms-logo-img" />
+          <div class="header-title-block">
+            <h1>Staff Resources <span class="version-badge version-text"></span></h1>
+            <div class="tms-meta-date" id="tms-meta-date"></div>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="btn-export" id="btn-export-pdf" style="display:none;">
+            <svg id="export-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span id="export-label">Export PDF</span>
+          </button>
+          <button class="expand-collapse-text" id="expandCollapseText" aria-expanded="false" aria-controls="expandableContent">
+            <span id="expandCollapseLabel">EXPAND</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Expandable content -->
+      <div class="expandable-content" id="expandableContent">
+        <div class="section-separator"></div>
+
+        <!-- Top-level tabs -->
+        <div class="tms-tabs" role="tablist" aria-label="Staff Resources sections">
+          <button class="tms-tab-btn active" data-tab="schedule" role="tab" aria-selected="true">Work Schedules</button>
+          <button class="tms-tab-btn" data-tab="orgchart" role="tab" aria-selected="false">Organizational Chart</button>
+          <button class="tms-tab-btn" data-tab="directory" role="tab" aria-selected="false">Directory</button>
+        </div>
+
+        <div class="tms-loading" id="tms-loading">Loading staff data&hellip;</div>
+        <div class="tms-load-error" id="tms-load-error" style="display:none;">
+          <div class="tms-load-error-title">Error loading staff data. Please contact TMS Admin.</div>
+          <div class="tms-load-error-detail" id="tms-load-error-detail"></div>
+        </div>
+
+        <!-- ── Work Schedules tab ─────────────────────────────────── -->
+        <section class="tms-tab-panel" id="tab-panel-schedule" aria-label="Work Schedules">
+          <div class="sched-controls">
+            <div class="sched-nav">
+              <button class="nav-btn" id="sched-prev-week" aria-label="Previous week">&lt;</button>
+              <button class="date-range clickable-date" id="sched-date-range">Loading&hellip;</button>
+              <button class="nav-btn" id="sched-next-week" aria-label="Next week">&gt;</button>
+            </div>
+            <div class="sched-nav-secondary">
+              <button class="jump-today-btn" id="sched-jump-today">Jump to Today</button>
+              <button class="filter-btn" id="sched-filter-btn">Filter Options</button>
+              <button class="copy-emails-btn" id="sched-copy-emails" title="Copy the email addresses of everyone currently shown">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                Copy Emails
+              </button>
+              <span class="week-display" id="sched-week-display">Week 1</span>
+            </div>
+            <div class="search-wrap">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="sched-search" placeholder="Search staff name&hellip;" aria-label="Search staff schedules" />
+            </div>
+          </div>
+
+          <div class="sched-grid" id="sched-grid"></div>
+
+          <div class="filter-results" id="sched-filter-results" style="display:none;">
+            <span id="sched-filter-results-text"></span>
+          </div>
+        </section>
+
+        <!-- ── Organizational Chart tab ───────────────────────────── -->
+        <section class="tms-tab-panel" id="tab-panel-orgchart" style="display:none;" aria-label="Organization Chart">
+          <div class="controls-inner">
+            <div class="search-wrap">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="orgchart-search" placeholder="Search name, title, email, ext&hellip;" aria-label="Search organization chart" />
+            </div>
+          </div>
+          <div id="org-view"><div class="no-results">Loading staff data&hellip;</div></div>
+        </section>
+
+        <!-- ── Directory tab ──────────────────────────────────────── -->
+        <section class="tms-tab-panel" id="tab-panel-directory" style="display:none;" aria-label="Staff Directory">
+          <div class="org-contact-bar" id="directory-org-contact"></div>
+          <div class="controls-inner">
+            <div class="search-wrap">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="directory-search" placeholder="Search name, title, email, ext&hellip;" aria-label="Search directory" />
+            </div>
+          </div>
+          <div class="dir-controls">
+            <span class="dir-sort-label">Sort by:</span>
+            <div class="dir-sort-btns" role="group" aria-label="Sort directory">
+              <button class="dir-sort-btn active" data-sort="alpha">A&ndash;Z</button>
+              <button class="dir-sort-btn" data-sort="role">Role</button>
+              <button class="dir-sort-btn" data-sort="dept">Department</button>
+              <button class="dir-sort-btn" data-sort="birthday">Birthday</button>
+            </div>
+          </div>
+          <div id="directory-grid-wrap"></div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Print frame for Org Chart PDF export — direct child of body so print/capture CSS can target it -->
+<div id="print-frame" aria-hidden="true"></div>
+
+<!-- Org Chart / Directory shared profile modal -->
+<div id="modal-overlay" class="modal-overlay" aria-hidden="true">
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="Staff profile"></div>
+</div>
+
+<!-- Photo lightbox -->
+<div id="lightbox" class="lightbox">
+  <img id="lightbox-img" src="" alt="" />
+  <div id="lightbox-name" class="lightbox-name"></div>
+</div>
+
+<!-- Work Schedules: employee detail modal -->
+<div id="sched-modal-overlay" class="modal-overlay" aria-hidden="true">
+  <div id="sched-modal" class="modal sched-modal" role="dialog" aria-modal="true" aria-label="Staff schedule"></div>
+</div>
+
+<!-- Work Schedules: filter modal -->
+<div id="sched-filter-modal-overlay" class="modal-overlay">
+  <div class="modal filter-modal-content" role="dialog" aria-modal="true" aria-label="Filter employees">
+    <div class="modal-header-row">
+      <h2>Filter Employees</h2>
+      <button class="close-btn" id="sched-close-filter" aria-label="Close filter">&times;</button>
+    </div>
+    <div class="search-container">
+      <input type="text" id="sched-filter-search" placeholder="Search employees by name&hellip;" aria-label="Search employees to filter" />
+    </div>
+    <div class="employee-list" id="sched-filter-list"></div>
+    <div class="filter-actions">
+      <div class="office-hours-filter-checkbox">
+        <input type="checkbox" id="sched-office-checkbox" />
+        <label for="sched-office-checkbox">Display In-Office Hours Only</label>
+      </div>
+      <div class="filter-action-buttons">
+        <button class="select-all-btn" id="sched-select-all">Select All</button>
+        <button class="deselect-all-btn" id="sched-deselect-all">Deselect All</button>
+        <button class="apply-filter-btn" id="sched-apply-filter">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Work Schedules: calendar modal -->
+<div id="sched-calendar-modal-overlay" class="modal-overlay">
+  <div class="modal calendar-modal-content" role="dialog" aria-modal="true" aria-label="Select work week">
+    <div class="modal-header-row">
+      <h2>Select Work Week</h2>
+      <button class="close-btn" id="sched-close-calendar" aria-label="Close calendar">&times;</button>
+    </div>
+    <div class="calendar-controls">
+      <button class="calendar-nav-btn" id="sched-cal-prev-month" aria-label="Previous month">&lt;</button>
+      <div class="calendar-month-year" id="sched-calendar-month-year">&nbsp;</div>
+      <button class="calendar-nav-btn" id="sched-cal-next-month" aria-label="Next month">&gt;</button>
+    </div>
+    <div class="calendar-grid" id="sched-calendar-grid"></div>
+    <div class="calendar-actions">
+      <button class="today-btn" id="sched-cal-today">Today</button>
+      <div class="calendar-action-buttons">
+        <button class="cancel-btn" id="sched-cal-cancel">Cancel</button>
+        <button class="apply-btn" id="sched-cal-apply">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="common.js"></script>
+<script src="data.js"></script>
+<script src="schedule.js"></script>
+<script src="orgchart.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

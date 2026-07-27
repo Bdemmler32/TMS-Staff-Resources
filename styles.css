@@ -1,0 +1,475 @@
+/* ============================================================
+   TMS Staff Resources — styles.css
+   Base type scale is 16px minimum per EAA/WCAG guidance. Colors,
+   card shapes, and the red TMS frame carry over from the original
+   Work Schedules and Org Chart tools.
+   ============================================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --tms-red: #ce1126;
+  --tms-red-dark: #a50d1f;
+  --ink: #232323;
+  --ink-soft: #55555f;
+  --line: #e2e2e8;
+  --bg-soft: #f5f5f7;
+  --focus: #1454d8;
+
+  --dept-exec: #ce1126;
+  --dept-yellow: #d9a300;
+  --dept-green: #1f8a4c;
+  --dept-orange: #d9622b;
+  --dept-blue: #1f6fd9;
+  --dept-pink: #c23b8a;
+}
+
+html { font-size: 16px; } /* 1rem = 16px baseline everywhere below */
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #eef0f2;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+h1, h2, h3 { font-family: 'Barlow Condensed', 'Inter', sans-serif; }
+
+/* Focus states — visible on every interactive element (EAA/WCAG 2.4.7) */
+button:focus-visible,
+input:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.page-frame { background: var(--tms-red); padding: 1px 0; }
+.container { max-width: 960px; margin: 0 auto; padding: 1.25rem 0; }
+
+/* ── Unified collapse/expand container ─────────────────────── */
+.unified-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  overflow: hidden;
+}
+.unified-container.collapsed { border-radius: 20px; }
+
+.header-section {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 1.25rem; gap: 1rem; flex-wrap: wrap;
+}
+.header-left { display: flex; align-items: center; gap: 0.875rem; min-width: 0; }
+.tms-logo-img { height: 34px; width: auto; flex-shrink: 0; }
+.header-title-block h1 {
+  font-size: 1.375rem; font-weight: 700; color: var(--ink); line-height: 1.2;
+}
+.version-badge {
+  font-size: 0.75rem; font-weight: 600; color: var(--tms-red);
+  background: #fdeceb; border-radius: 999px; padding: 0.15em 0.6em; margin-left: 0.5em;
+  vertical-align: middle; font-family: 'Inter', sans-serif;
+}
+.tms-meta-date { font-size: 0.8125rem; color: var(--ink-soft); margin-top: 0.15em; }
+
+.header-right { display: flex; align-items: center; gap: 0.625rem; }
+
+.btn-export, .expand-collapse-text {
+  display: inline-flex; align-items: center; gap: 0.4em;
+  font-size: 0.875rem; font-weight: 600; font-family: 'Inter', sans-serif;
+  border-radius: 999px; padding: 0.55em 1.1em; cursor: pointer; border: 1.5px solid var(--line);
+  background: #fff; color: var(--ink);
+}
+.btn-export { background: var(--tms-red); color: #fff; border-color: var(--tms-red); }
+.btn-export:disabled { opacity: 0.55; cursor: default; }
+.btn-export:hover:not(:disabled) { background: var(--tms-red-dark); }
+.expand-collapse-text:hover { background: var(--bg-soft); }
+
+/* ── Expandable content ──────────────────────────────────────── */
+.expandable-content { max-height: 6000px; transition: max-height .25s ease; }
+.expandable-content.collapsed { max-height: 0; overflow: hidden; }
+.section-separator { height: 1px; background: var(--line); }
+
+/* ── Tabs ────────────────────────────────────────────────────── */
+.tms-tabs {
+  display: flex; gap: 0.5rem; padding: 1rem 1.25rem; flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+}
+.tms-tab-btn {
+  font-family: 'Inter', sans-serif; font-size: 0.9375rem; font-weight: 600;
+  padding: 0.65em 1.2em; border-radius: 999px; border: 1.5px solid var(--line);
+  background: #fff; color: var(--ink-soft); cursor: pointer;
+}
+.tms-tab-btn:hover { background: var(--bg-soft); }
+.tms-tab-btn.active { background: var(--tms-red); color: #fff; border-color: var(--tms-red); }
+.tms-tab-panel { padding: 1.1rem 1.25rem 2.25rem; }
+
+.tms-loading, .tms-load-error { padding: 2rem 1.25rem; text-align: center; color: var(--ink-soft); }
+.tms-load-error-title { color: var(--tms-red); font-weight: 700; margin-bottom: 0.4em; }
+.tms-load-error-detail { font-size: 0.8125rem; }
+
+.no-results { padding: 2rem 1rem; text-align: center; color: var(--ink-soft); font-size: 0.9375rem; }
+
+/* ── Search box (shared) ─────────────────────────────────────── */
+.controls-inner { display: flex; gap: 0.6em; margin-bottom: 0.9rem; width: 100%; }
+.search-wrap {
+  display: flex; align-items: center; gap: 0.6em; width: 100%; flex: 1;
+  background: var(--bg-soft); border: 1.5px solid var(--line); border-radius: 10px;
+  padding: 0.55em 0.85em; margin-bottom: 0.9rem;
+}
+.controls-inner .search-wrap { margin-bottom: 0; }
+.search-wrap svg { color: var(--ink-soft); flex-shrink: 0; }
+.search-wrap input {
+  border: none; background: transparent; outline: none; font-size: 1rem;
+  font-family: 'Inter', sans-serif; width: 100%; color: var(--ink);
+}
+
+/* ============================================================
+   WORK SCHEDULES TAB
+   ============================================================ */
+.sched-controls { margin-bottom: 1rem; }
+.sched-nav { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.6rem; }
+.nav-btn {
+  width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 1.5px solid var(--line);
+  background: #fff; font-size: 1.1rem; cursor: pointer;
+}
+.nav-btn:hover { background: var(--bg-soft); }
+.date-range {
+  font-size: 1rem; font-weight: 600; background: none; border: none; cursor: pointer;
+  padding: 0.3em 0.6em; border-radius: 8px;
+}
+.date-range:hover { background: var(--bg-soft); }
+
+.sched-nav-secondary {
+  display: flex; align-items: center; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;
+}
+.jump-today-btn, .filter-btn, .copy-emails-btn {
+  font-size: 0.875rem; font-weight: 600; border: 1.5px solid var(--line); background: #fff;
+  border-radius: 999px; padding: 0.5em 1em; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.4em;
+}
+.jump-today-btn:hover, .filter-btn:hover, .copy-emails-btn:hover { background: var(--bg-soft); }
+.filter-btn.is-active-filter { background: #fdeceb; border-color: var(--tms-red); color: var(--tms-red); }
+.filter-btn.is-active-filter:hover { background: #fbdad7; }
+.week-display {
+  font-size: 0.875rem; font-weight: 700; color: var(--tms-red); background: #fdeceb;
+  border-radius: 999px; padding: 0.4em 0.9em;
+}
+
+/* Fixed-width, table-like grid: #sched-grid is the ONE grid container that
+   defines column widths; each .sched-row uses display:contents so its cells
+   join the parent grid instead of starting a new independent grid (which is
+   what caused columns to drift out of alignment between rows before). */
+.sched-grid {
+  display: grid; grid-template-columns: 9.5rem repeat(5, 1fr);
+  border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+}
+.sched-row { display: contents; }
+.sched-cell { border-top: 1px solid var(--line); min-width: 0; }
+.sched-header-row .sched-cell { border-top: none; }
+.sched-header-row .sched-cell {
+  background: var(--bg-soft); font-weight: 700; font-size: 0.8125rem; text-transform: uppercase;
+  letter-spacing: .03em; color: var(--ink-soft);
+}
+.sched-row-alt .sched-cell { background: #fafafc; }
+.sched-col-name { padding: 0.6rem; display: flex; align-items: center; overflow: hidden; }
+.sched-col-day {
+  padding: 0.5rem 0.3rem; align-items: stretch; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0.2rem; border-left: 1px solid var(--line); container-type: inline-size;
+}
+.sched-cell.sched-today-col { background: #fdeceb; position: relative; }
+.sched-header-row .sched-cell.sched-today-col { background: #f8c9c9; }
+.sched-cell.sched-selected-col { background: #eaf1fd; position: relative; }
+.sched-header-row .sched-cell.sched-selected-col { background: #cfe0fb; }
+.sched-day-header-btn {
+  border: none; background: none; cursor: pointer; font: inherit; text-transform: inherit;
+  letter-spacing: inherit; color: inherit; text-align: center;
+}
+.sched-day-header-btn:hover, .sched-staff-header-btn:hover { filter: brightness(0.96); }
+.sched-day-full-name { display: block; text-align: center; }
+.sched-staff-header-btn {
+  border: none; background: none; cursor: pointer; font: inherit; text-transform: inherit;
+  letter-spacing: inherit; color: inherit; text-align: left; width: 100%;
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+}
+.sched-today-badge {
+  display: block; font-size: 0.65rem; font-weight: 700; color: var(--tms-red); text-transform: none;
+  letter-spacing: 0; margin-top: 0.1rem;
+}
+/* Always takes up the same line height whether or not it's showing text, so
+   headers never shift position depending on today/selected state. */
+.sched-today-badge.sched-badge-reserved { visibility: hidden; }
+.sched-name-btn {
+  border: none; background: none; cursor: pointer; text-align: left; width: 100%;
+  display: flex; align-items: center; gap: 0.6rem; font-family: 'Inter', sans-serif; padding: 0.35rem 0;
+}
+.sched-col-name { gap: 0.6rem; }
+.sched-name-text { display: flex; flex-direction: column; align-items: flex-start; gap: 0.05rem; min-width: 0; }
+.sched-photo, .sched-photo.photo-unavailable { width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.sched-name-first, .sched-name-last { font-size: 0.9375rem; font-weight: 600; color: var(--ink); line-height: 1.3; display: block; text-align: left; }
+.sched-off { color: #b7b7bf; font-size: 0.875rem; }
+
+.time-pill {
+  display: inline-flex; align-items: center; gap: 0.15em; background: var(--bg-soft);
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.2em 0.35em;
+  font-weight: 600; color: var(--ink); box-sizing: border-box;
+}
+/* Only inside the Work Schedules grid does each pill get the full column
+   width (so pills stack one-per-row and text can shrink-to-fit reliably).
+   Everywhere else the class is reused (e.g. the two-week schedule modal),
+   pills stay their natural inline size instead of stretching full-width. */
+.sched-day-cell .time-pill { display: flex; width: 100%; }
+.time-pill .loc-icon { width: 0.9em; height: 0.9em; flex-shrink: 0; color: var(--tms-red); }
+.time-pill-text {
+  /* Base/default sizing — used wherever pills are reused outside the grid
+     (e.g. the two-week schedule modal), where there's plenty of width and no
+     sized container to measure cqw against. */
+  font-size: 0.9375rem;
+  line-height: 1.25;
+}
+/* Intentional exception to the 16px baseline, grid-only: sized relative to
+   the actual day-column width (container query units, not viewport). Each
+   pill gets the full column width to itself (pills stack vertically). No
+   artificial floor — it shrinks as far as it needs to so the full time
+   always renders on one line; ellipsis below is only a theoretical last
+   resort. */
+.sched-day-cell .time-pill-text {
+  font-size: min(8cqw, 0.8125rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+  line-height: 1.2;
+}
+
+.filter-results { margin-top: 0.75rem; font-size: 0.875rem; color: var(--ink-soft); text-align: center; }
+
+/* Schedule employee detail modal */
+.sched-modal-body { padding: 0 0.25rem; }
+.sched-modal-week-title { font-size: 1.05rem; font-weight: 700; margin: 1rem 0 0.5rem; color: var(--tms-red); }
+.sched-modal-day-row { display: flex; gap: 0.75rem; padding: 0.45rem 0; border-top: 1px solid var(--line); align-items: center; flex-wrap: wrap; }
+.sched-modal-day-row:first-of-type { border-top: none; }
+.sched-modal-day-label { width: 6rem; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+.sched-modal-day-blocks { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+/* Filter modal */
+.employee-list { max-height: 15rem; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem; margin: 0.75rem 0; }
+.sched-filter-row { display: flex; align-items: center; gap: 0.6em; padding: 0.4em 0.3em; font-size: 0.9375rem; }
+.sched-filter-row input { width: 1.15rem; height: 1.15rem; }
+.search-container { margin-bottom: 0.5rem; }
+.search-container input {
+  width: 100%; padding: 0.55em 0.8em; border: 1.5px solid var(--line); border-radius: 8px; font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+}
+.office-hours-filter-checkbox { display: flex; align-items: center; gap: 0.5em; margin: 0.75rem 0; font-size: 0.9375rem; }
+.office-hours-filter-checkbox input { width: 1.15rem; height: 1.15rem; }
+.filter-action-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.select-all-btn, .deselect-all-btn, .apply-filter-btn, .cancel-btn, .apply-btn, .today-btn {
+  font-size: 0.875rem; font-weight: 600; border: 1.5px solid var(--line); background: #fff;
+  border-radius: 8px; padding: 0.55em 1em; cursor: pointer;
+}
+.apply-filter-btn, .apply-btn { background: var(--tms-red); color: #fff; border-color: var(--tms-red); }
+
+/* Calendar modal */
+.calendar-controls { display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; margin: 0.75rem 0; }
+.calendar-nav-btn { width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; cursor: pointer; }
+.calendar-month-year { font-weight: 700; font-size: 1.05rem; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; }
+.sched-cal-dow { text-align: center; font-size: 0.75rem; font-weight: 700; color: var(--ink-soft); padding: 0.3rem 0; }
+.sched-cal-day {
+  aspect-ratio: 1; border: 1px solid var(--line); background: #fff; border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+}
+.sched-cal-day:hover { background: var(--bg-soft); }
+.sched-cal-day.is-today { border-color: var(--tms-red); font-weight: 700; }
+.sched-cal-day.selected { background: var(--tms-red); color: #fff; border-color: var(--tms-red); }
+.calendar-actions { display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+.calendar-action-buttons { display: flex; gap: 0.5rem; }
+
+/* ============================================================
+   ORG CHART TAB
+   ============================================================ */
+.exec-row { margin-bottom: 1rem; }
+.dept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr)); gap: 1rem; }
+.dept-block { border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; }
+.dept-header { padding: 0.75rem; color: #fff; }
+.dept-exec .dept-header, .exec-block .dept-header { background: var(--dept-exec); }
+.dept-yellow .dept-header { background: var(--dept-yellow); }
+.dept-green .dept-header { background: var(--dept-green); }
+.dept-orange .dept-header { background: var(--dept-orange); }
+.dept-blue .dept-header { background: var(--dept-blue); }
+.dept-pink .dept-header { background: var(--dept-pink); }
+.dept-name {
+  font-size: 0.875rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dept-header { min-width: 0; }
+.dept-head-wrap { margin-top: 0.25rem; }
+.dept-members { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.manager-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.reports-indent { margin-left: 1rem; padding-left: 0.75rem; border-left: 2px solid var(--line); display: flex; flex-direction: column; gap: 0.4rem; }
+
+.staff-card {
+  display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: left;
+  border: 1px solid var(--line); border-radius: 10px; padding: 0.5rem 0.65rem; background: #fff; cursor: pointer;
+}
+.staff-card:hover { background: var(--bg-soft); }
+.dept-head-card { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+.dept-head-card:hover { background: rgba(255,255,255,0.28); }
+.dept-head-card .staff-name, .dept-head-card .staff-title { color: #fff; }
+.staff-photo, .staff-photo.photo-unavailable { width: 2.75rem; height: 2.75rem; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.staff-info { min-width: 0; }
+.staff-name { font-size: 0.9375rem; font-weight: 700; line-height: 1.2; }
+.staff-title { font-size: 0.8125rem; color: var(--ink-soft); line-height: 1.25; }
+.dept-head-card .staff-title { color: rgba(255,255,255,0.85); }
+
+/* Photo-unavailable placeholder — visually distinct from a normal photo */
+.photo-unavailable {
+  display: flex; align-items: center; justify-content: center; position: relative;
+  background: var(--bg-soft); color: var(--ink-soft); border: 1.5px dashed #c7c7cf;
+}
+.photo-unavailable .pu-initials { font-weight: 700; font-size: 0.85em; }
+.photo-unavailable .pu-icon {
+  position: absolute; bottom: -2px; right: -2px; background: #fff; border-radius: 50%;
+  border: 1.5px solid var(--line); width: 55%; height: 55%; display: flex; align-items: center;
+  justify-content: center; color: var(--tms-red);
+}
+.photo-unavailable .pu-icon svg { width: 65%; height: 65%; }
+
+/* ============================================================
+   DIRECTORY TAB
+   ============================================================ */
+.dir-controls { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.org-contact-bar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.8125rem; color: var(--ink-soft);
+  margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--line);
+}
+.org-contact-item { display: inline-flex; align-items: center; gap: 0.3em; }
+.org-contact-item svg { color: var(--tms-red); flex-shrink: 0; }
+.org-contact-item a { color: var(--focus); text-decoration: none; }
+.org-contact-item a:hover { text-decoration: underline; }
+.org-contact-sep { color: var(--line); }
+.dir-sort-label { font-size: 0.9375rem; font-weight: 600; color: var(--ink-soft); }
+.dir-sort-btns { display: flex; gap: 0.4rem; }
+.dir-sort-btn { font-size: 0.875rem; font-weight: 600; border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: 0.4em 0.9em; cursor: pointer; }
+.dir-sort-btn.active { background: var(--tms-red); color: #fff; border-color: var(--tms-red); }
+.dir-dept-group-header { font-size: 1.05rem; font-weight: 700; margin: 1.25rem 0 0.6rem; color: var(--tms-red); }
+.directory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr)); gap: 0.9rem; }
+.dir-card {
+  border: 1.5px solid var(--line); border-top: 5px solid var(--dept-exec); border-radius: 12px; padding: 0.9rem;
+  background: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.3rem;
+}
+.dir-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+.dir-card.dept-yellow { border-top-color: var(--dept-yellow); }
+.dir-card.dept-green { border-top-color: var(--dept-green); }
+.dir-card.dept-orange { border-top-color: var(--dept-orange); }
+.dir-card.dept-blue { border-top-color: var(--dept-blue); }
+.dir-card.dept-pink { border-top-color: var(--dept-pink); }
+.dir-photo, .dir-photo.photo-unavailable { width: 4.5rem; height: 4.5rem; border-radius: 50%; object-fit: cover; margin-bottom: 0.3rem; }
+.dir-name { font-weight: 700; font-size: 1rem; }
+.dir-title { font-size: 0.8125rem; color: var(--ink-soft); }
+.dir-dept-badge { font-size: 0.75rem; font-weight: 600; background: var(--bg-soft); border-radius: 999px; padding: 0.2em 0.75em; margin: 0.2rem 0; }
+.dir-birthday { display: flex; align-items: center; gap: 0.35em; font-size: 0.8125rem; color: var(--ink-soft); }
+.dir-birthday svg { color: var(--tms-red); flex-shrink: 0; }
+.dir-contact { font-size: 0.8125rem; color: var(--ink-soft); margin-top: 0.3rem; width: 100%; }
+.dir-contact-row { display: flex; align-items: center; gap: 0.4em; justify-content: center; padding: 0.15rem 0; }
+.dir-contact a { color: var(--focus); text-decoration: none; }
+.dir-contact a:hover { text-decoration: underline; }
+
+/* ============================================================
+   MODALS (profile / schedule) + LIGHTBOX
+   ============================================================ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(20,20,26,0.55);
+  align-items: center; justify-content: center; z-index: 1000; padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 14px; max-width: 30rem; width: 100%; max-height: 88vh;
+  overflow-y: auto; padding: 1.5rem; position: relative;
+}
+.sched-modal { max-width: 34rem; }
+.filter-modal-content, .calendar-modal-content { max-width: 26rem; width: 100%; background: #fff; border-radius: 14px; padding: 1.5rem; }
+.modal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.modal-header-row h2 { font-size: 1.15rem; }
+.close-btn { border: none; background: none; font-size: 1.5rem; cursor: pointer; line-height: 1; color: var(--ink-soft); }
+
+.modal-close {
+  position: absolute; top: 0.75rem; right: 0.75rem; border: none; background: var(--bg-soft);
+  width: 2rem; height: 2rem; border-radius: 50%; cursor: pointer; font-size: 1rem;
+}
+.modal-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.modal-photo, .modal-photo.photo-unavailable { width: 5rem; height: 5rem; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.modal-photo-wrap { position: relative; cursor: zoom-in; flex-shrink: 0; }
+.modal-photo-zoom-hint {
+  position: absolute; bottom: -2px; right: -2px; background: var(--tms-red); color: #fff; border-radius: 50%;
+  width: 1.4rem; height: 1.4rem; display: flex; align-items: center; justify-content: center;
+}
+.modal-name { font-size: 1.2rem; font-weight: 700; }
+.modal-title-text { font-size: 0.9375rem; color: var(--ink-soft); }
+.modal-dept-badge { display: inline-block; margin-top: 0.35rem; font-size: 0.75rem; font-weight: 600; background: var(--bg-soft); border-radius: 999px; padding: 0.2em 0.75em; }
+.modal-contact-row { display: flex; gap: 0.75rem; padding: 0.5rem 0; border-top: 1px solid var(--line); }
+.modal-contact-row:first-child { border-top: none; }
+.modal-contact-icon { color: var(--tms-red); margin-top: 0.15rem; flex-shrink: 0; }
+.modal-contact-label { font-size: 0.75rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .03em; }
+.modal-contact-value { font-size: 0.9375rem; }
+.modal-contact-value a { color: var(--focus); text-decoration: none; }
+.modal-contact-value a:hover { text-decoration: underline; }
+.modal-contact-value sup, .dir-contact sup { color: var(--tms-red); font-weight: 700; }
+.modal-phone-note {
+  margin-top: 0.6rem; font-size: 0.75rem; color: var(--ink-soft); font-style: italic;
+}
+.dir-phone-note {
+  margin-top: 0.3rem; font-size: 0.7rem; color: var(--ink-soft); font-style: italic; text-align: center;
+}
+.modal-description { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: 0.9375rem; color: var(--ink); }
+.view-schedule-btn {
+  display: flex; align-items: center; justify-content: center; gap: 0.5em; width: 100%;
+  margin-top: 1.1rem; padding: 0.65em 1em; border-radius: 10px; border: none;
+  background: var(--tms-red); color: #fff; font-size: 0.9375rem; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+.view-schedule-btn:hover { background: var(--tms-red-dark); }
+
+.lightbox {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1100;
+  align-items: center; justify-content: center; flex-direction: column; gap: 1rem; cursor: zoom-out;
+}
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 80vh; border-radius: 10px; }
+.lightbox-name { color: #fff; font-size: 1.1rem; font-weight: 600; }
+
+/* ============================================================
+   PRINT FRAME (used only to render the PDF export capture)
+   ============================================================ */
+#print-frame {
+  position: fixed; left: -19999px; top: -19999px; visibility: hidden;
+  background: #fff; padding: 1.25rem;
+}
+#print-frame .page-header-row { display: flex; align-items: center; gap: 0.875rem; margin-bottom: 1rem; }
+#print-frame .tms-logo-img { height: 30px; }
+#print-frame .page-title { font-size: 1.25rem; font-weight: 700; }
+#print-frame .page-meta { margin-left: auto; font-size: 0.8125rem; color: var(--ink-soft); }
+
+/* ============================================================
+   TOAST NOTIFICATION
+   ============================================================ */
+.tms-toast {
+  position: fixed; left: 50%; bottom: 1.5rem; transform: translate(-50%, 1rem);
+  background: var(--ink); color: #fff; font-size: 0.9375rem; font-weight: 600;
+  padding: 0.75em 1.25em; border-radius: 999px; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; z-index: 1200;
+}
+.tms-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+  .header-section { flex-direction: column; align-items: flex-start; }
+  .sched-grid { grid-template-columns: 7rem repeat(5, 1fr); font-size: 0.8rem; }
+  .sched-col-day { border-left: none; }
+  .dept-grid { grid-template-columns: 1fr; }
+}
