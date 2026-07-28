@@ -231,9 +231,12 @@ window.TMSOrgChart = (function () {
     if (!wrap) return;
     wrap.innerHTML = '';
     const q = dirSearchQuery;
-    const roleOrder = { executive: 0, deputy: 1, exec_staff: 2, dept_head: 3, manager: 4, staff: 5 };
     const deptOrder = Object.keys(depts());
     let sorted = people().filter((p) => matches(p, q));
+
+    // A department's "leader" is its dept_head, or (for Executive) the CEO.
+    function isLeader(p) { return p.role === 'dept_head' || p.role === 'executive'; }
+    function byLastName(a, b) { return lastNameOf(a.name).localeCompare(lastNameOf(b.name)) || a.name.localeCompare(b.name); }
 
     function grid(list) {
       const g = document.createElement('div');
@@ -256,9 +259,9 @@ window.TMSOrgChart = (function () {
         if (!members || members.length === 0) return;
         any = true;
         members.sort((a, b) => {
-          if (a.role === 'dept_head' && b.role !== 'dept_head') return -1;
-          if (b.role === 'dept_head' && a.role !== 'dept_head') return 1;
-          return lastNameOf(a.name).localeCompare(lastNameOf(b.name)) || a.name.localeCompare(b.name);
+          if (isLeader(a) && !isLeader(b)) return -1;
+          if (isLeader(b) && !isLeader(a)) return 1;
+          return byLastName(a, b);
         });
         const hdr = document.createElement('div');
         hdr.className = 'dir-dept-group-header';
@@ -271,9 +274,22 @@ window.TMSOrgChart = (function () {
       sorted.sort((a, b) => window.TMSCommon.daysUntilBirthday(a.birthdate) - window.TMSCommon.daysUntilBirthday(b.birthdate));
       wrap.appendChild(grid(sorted));
     } else {
+      // Role sort: Executive (CEO first, then deputy/exec staff alpha) →
+      // Department heads (alpha) → Managers (alpha) → Staff (alpha).
+      const tier = (p) => {
+        if (p.role === 'executive' || p.role === 'deputy' || p.role === 'exec_staff') return 0;
+        if (p.role === 'dept_head') return 1;
+        if (p.role === 'manager') return 2;
+        return 3;
+      };
       sorted.sort((a, b) => {
-        const d = (roleOrder[a.role] ?? 9) - (roleOrder[b.role] ?? 9);
-        return d !== 0 ? d : a.name.localeCompare(b.name);
+        const d = tier(a) - tier(b);
+        if (d !== 0) return d;
+        if (tier(a) === 0) {
+          if (a.role === 'executive' && b.role !== 'executive') return -1;
+          if (b.role === 'executive' && a.role !== 'executive') return 1;
+        }
+        return byLastName(a, b);
       });
       wrap.appendChild(grid(sorted));
     }
@@ -434,8 +450,7 @@ window.TMSOrgChart = (function () {
     hdrRow.innerHTML =
       '<div class="page-header-left">' +
         '<img src="assets/tms-logo.png" alt="TMS" class="tms-logo-img" />' +
-        '<h1 class="page-title">Staff Organization Chart' +
-        '<span class="version-badge version-text">' + esc(window.TMS.version || '') + '</span></h1>' +
+        '<h1 class="page-title">Staff Organization Chart</h1>' +
       '</div>' +
       '<span class="page-meta">' + esc(window.TMS.dateStr || '') + '</span>';
     frame.appendChild(hdrRow);
@@ -483,7 +498,7 @@ window.TMSOrgChart = (function () {
     }
 
     html2canvas(frame, {
-      scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff',
+      scale: 3, useCORS: true, allowTaint: false, backgroundColor: '#ffffff',
       width: 1400, windowWidth: 1400, logging: false,
     }).then((canvas) => {
       restore();
@@ -494,8 +509,8 @@ window.TMSOrgChart = (function () {
       const margin = 0.25;
       const useW = 11 - margin * 2;
       const useH = 8.5 - margin * 2;
-      const canvasW = canvas.width / 2;
-      const canvasH = canvas.height / 2;
+      const canvasW = canvas.width / 3;
+      const canvasH = canvas.height / 3;
       const ratio = Math.min(useW / (canvasW / 96), useH / (canvasH / 96));
       const imgW = (canvasW / 96) * ratio;
       const imgH = (canvasH / 96) * ratio;
@@ -631,7 +646,7 @@ window.TMSOrgChart = (function () {
     }
 
     html2canvas(frame, {
-      scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff',
+      scale: 3, useCORS: true, allowTaint: false, backgroundColor: '#ffffff',
       width: frameWidth, windowWidth: frameWidth, logging: false,
     }).then((canvas) => {
       restore();
@@ -642,8 +657,8 @@ window.TMSOrgChart = (function () {
       const margin = 0.4;
       const useW = 8.5 - margin * 2;
       const useH = 11 - margin * 2;
-      const canvasW = canvas.width / 2;
-      const canvasH = canvas.height / 2;
+      const canvasW = canvas.width / 3;
+      const canvasH = canvas.height / 3;
       const ratio = Math.min(useW / (canvasW / 96), useH / (canvasH / 96));
       const imgW = (canvasW / 96) * ratio;
       const imgH = (canvasH / 96) * ratio;

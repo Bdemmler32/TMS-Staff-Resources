@@ -23,7 +23,7 @@ window.TMSTour = (function () {
     },
     {
       tab: 'schedule',
-      selector: '#sched-grid',
+      selector: '.sched-staff-header-btn',
       title: 'Reading the schedule grid',
       body: 'Each row is a staff member; each column is a workday. The icon on every time pill shows where that block is worked \u2014 office or remote.',
     },
@@ -73,6 +73,7 @@ window.TMSTour = (function () {
     {
       tab: 'directory',
       selector: '#directory-org-contact',
+      pad: { top: 14, bottom: 8, left: 8, right: 8 },
       title: 'The Staff Directory',
       body: 'Every staff member as a searchable card, with TMS\u2019s main contact info always visible up top. Sort by A\u2013Z, Role, Department, or upcoming Birthday.',
     },
@@ -128,16 +129,16 @@ window.TMSTour = (function () {
     });
   }
 
-  function position(target) {
+  function position(target, padOverride) {
     const spotlight = document.getElementById('tour-spotlight');
     const tooltip = document.getElementById('tour-tooltip');
-    const pad = 8;
+    const pad = { top: 8, bottom: 8, left: 8, right: 8, ...(padOverride || {}) };
     const rect = target.getBoundingClientRect();
 
-    spotlight.style.top = (rect.top - pad) + 'px';
-    spotlight.style.left = (rect.left - pad) + 'px';
-    spotlight.style.width = (rect.width + pad * 2) + 'px';
-    spotlight.style.height = (rect.height + pad * 2) + 'px';
+    spotlight.style.top = (rect.top - pad.top) + 'px';
+    spotlight.style.left = (rect.left - pad.left) + 'px';
+    spotlight.style.width = (rect.width + pad.left + pad.right) + 'px';
+    spotlight.style.height = (rect.height + pad.top + pad.bottom) + 'px';
 
     const vw = window.innerWidth;
     const vh = window.innerHeight;
@@ -181,7 +182,7 @@ window.TMSTour = (function () {
       (step.fallbackSelector ? document.querySelector(step.fallbackSelector) : null);
     if (target) {
       target.scrollIntoView({ block: 'center', behavior: 'auto' });
-      requestAnimationFrame(() => position(target));
+      requestAnimationFrame(() => position(target, step.pad));
     }
   }
 
@@ -211,7 +212,7 @@ window.TMSTour = (function () {
       const step = steps[stepIndex];
       const target = step && (document.querySelector(step.selector) ||
         (step.fallbackSelector ? document.querySelector(step.fallbackSelector) : null));
-      if (target) position(target);
+      if (target) position(target, step.pad);
     };
     window.addEventListener('resize', resizeHandler);
 
