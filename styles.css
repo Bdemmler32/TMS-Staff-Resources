@@ -483,11 +483,115 @@ button.org-contact-copy:hover { text-decoration: underline; }
 #print-frame .page-title { font-size: 1.25rem; font-weight: 700; }
 #print-frame .page-meta { margin-left: auto; font-size: 0.8125rem; color: var(--ink-soft); }
 
+/* Print-only: stretch the exec row and department grid to the full frame
+   width (eliminating side margins), and center the Executive group (header
+   label, CEO card, and every other Executive staff card) as a whole within
+   that now-wider container — otherwise each card's own width:100% would
+   leave a large empty gap on the right. */
+#print-frame .exec-row, #print-frame .exec-block, #print-frame .dept-grid { width: 100%; }
+#print-frame .exec-block .dept-header {
+  display: flex; flex-direction: column; align-items: center;
+}
+#print-frame .exec-block .dept-members {
+  display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: flex-start;
+  gap: 0.6rem;
+}
+#print-frame .exec-block .staff-card { width: auto; }
+#print-frame .exec-block .dept-header .staff-card { max-width: 26rem; }
+#print-frame .exec-block .dept-members .staff-card { flex: 0 1 15rem; }
+
 .dirprint-contact-line {
   font-size: 0.75rem; color: var(--ink-soft); margin: -0.4rem 0 0.9rem; padding-bottom: 0.6rem;
   border-bottom: 1px solid var(--line);
   display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;
 }
+
+/* ============================================================
+   DIRECTORY EXPORT CHOICE MODAL
+   ============================================================ */
+.dirx-modal-content { max-width: 32rem; width: 100%; }
+.dirx-options { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+.dirx-option {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem; text-align: left;
+  border: 1.5px solid var(--line); border-radius: 10px; padding: 0.75rem 1rem; background: #fff; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.dirx-option:hover:not(:disabled) { border-color: var(--tms-red); background: #fdeceb; }
+.dirx-option:disabled { opacity: 0.5; cursor: default; }
+.dirx-option-title { font-weight: 700; font-size: 0.9375rem; color: var(--ink); }
+.dirx-option-desc { font-size: 0.8125rem; color: var(--ink-soft); }
+.dirx-status { margin-top: 0.75rem; text-align: center; font-size: 0.875rem; font-weight: 600; color: var(--tms-red); }
+
+/* ============================================================
+   LOBBY POSTER — Staff Phone Directory (Direct Dials Only)
+   ============================================================ */
+.dirx-poster-frame { padding: 0 !important; }
+.dirx-poster-header {
+  background: linear-gradient(120deg, #14161c 0%, #14161c 55%, #1c3a5e 78%, #2a5c8f 100%);
+  padding: 1.4rem 1.6rem; display: flex; align-items: center; gap: 1.25rem;
+  border-radius: 14px 14px 0 0;
+}
+.dirx-poster-logo { height: 72px; width: auto; }
+.dirx-poster-title-block { display: flex; flex-direction: column; }
+.dirx-poster-title { color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 2.6rem; letter-spacing: 0.02em; line-height: 1; }
+.dirx-poster-subtitle { color: #dfe4ec; font-style: italic; font-size: 1.3rem; margin-top: 0.2rem; }
+.dirx-poster-banner {
+  background: var(--tms-red); color: #fff; font-size: 0.95rem; font-weight: 600;
+  padding: 0.65rem 1.6rem; text-align: center; white-space: nowrap;
+}
+.dirx-poster-banner-sep { opacity: 0.6; margin: 0 0.3em; }
+.dirx-poster-body { padding: 1.3rem 1.6rem 1.5rem; }
+.dirx-poster-notice { margin-bottom: 0.85rem; }
+.dirx-poster-notice-title { color: var(--tms-red); font-weight: 800; font-size: 1.3rem; font-family: 'Barlow Condensed', sans-serif; }
+.dirx-poster-notice-text { font-size: 1.05rem; color: var(--ink); }
+.dirx-poster-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; margin-top: 1.3rem; }
+.dirx-poster-table { display: flex; flex-direction: column; }
+.dirx-poster-row {
+  display: grid; grid-template-columns: 1fr 8rem; gap: 0.5rem;
+  padding: 0.5rem 0.65rem; border: 1px solid var(--line); border-top: none; font-size: 1rem;
+}
+.dirx-poster-row:first-child, .dirx-poster-header-row { border-top: 1px solid var(--line); }
+.dirx-poster-row:not(.dirx-poster-header-row) div:first-child { font-weight: 700; }
+.dirx-poster-header-row { background: var(--tms-red); color: #fff; font-weight: 700; }
+
+/* ============================================================
+   PHOTO DIRECTORY — one page per department
+   ============================================================ */
+.dirx-photo-page { padding: 0.5in !important; box-sizing: border-box; overflow: hidden; }
+.dirx-photo-page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.75rem; border-bottom: 2px solid var(--tms-red); padding-bottom: 0.6rem;
+}
+.dirx-photo-page-header-left { display: flex; align-items: center; gap: 0.75rem; }
+.dirx-photo-logo { height: 32px; }
+.dirx-photo-main-title { font-size: 1.4rem; font-weight: 800; font-family: 'Barlow Condensed', sans-serif; color: var(--ink); }
+.dirx-photo-date { font-size: 0.8125rem; color: var(--ink-soft); }
+.dirx-photo-dept-band {
+  color: #fff; font-size: 1.15rem; font-weight: 800; font-family: 'Barlow Condensed', sans-serif;
+  padding: 0.45rem 0.9rem; border-radius: 8px; margin-bottom: 1.1rem;
+}
+.dirx-photo-dept-band.dept-exec { background: var(--dept-exec); }
+.dirx-photo-dept-band.dept-yellow { background: var(--dept-yellow); }
+.dirx-photo-dept-band.dept-green { background: var(--dept-green); }
+.dirx-photo-dept-band.dept-orange { background: var(--dept-orange); }
+.dirx-photo-dept-band.dept-blue { background: var(--dept-blue); }
+.dirx-photo-dept-band.dept-pink { background: var(--dept-pink); }
+.dirx-photo-continued { font-size: 0.85rem; font-style: italic; font-weight: 400; opacity: 0.9; }
+.dirx-photo-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.1rem 0.9rem; }
+.dirx-photo-card {
+  flex: 0 0 calc((100% - 1.8rem) / 3); box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.15rem;
+  border: 1px solid var(--line); border-radius: 14px; padding: 1rem 0.75rem;
+}
+.dirx-photo-img, .dirx-photo-img.photo-unavailable { width: 6.5rem; height: 6.5rem; border-radius: 50%; object-fit: cover; margin-bottom: 0.35rem; }
+.dirx-photo-name { font-weight: 700; font-size: 0.9375rem; }
+.dirx-photo-title { font-size: 0.8125rem; color: var(--ink-soft); }
+.dirx-photo-email { font-size: 0.75rem; color: var(--focus); }
+
+/* ============================================================
+   BIRTHDAYS LIST
+   ============================================================ */
+.dirx-bday-row { grid-template-columns: 1fr 10rem !important; }
 .dirprint-contact-item { display: inline-flex; align-items: center; gap: 0.3em; }
 .dirprint-contact-item svg { color: var(--tms-red); flex-shrink: 0; }
 .dirprint-contact-sep { color: var(--line); }

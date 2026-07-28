@@ -55,7 +55,7 @@
         <!-- Top-level tabs -->
         <div class="tms-tabs" role="tablist" aria-label="Staff Resources sections">
           <button class="tms-tab-btn active" data-tab="schedule" role="tab" aria-selected="true">Work Schedules</button>
-          <button class="tms-tab-btn" data-tab="orgchart" role="tab" aria-selected="false">Organizational Chart</button>
+          <button class="tms-tab-btn" data-tab="orgchart" role="tab" aria-selected="false">Organization Chart</button>
           <button class="tms-tab-btn" data-tab="directory" role="tab" aria-selected="false">Directory</button>
         </div>
 
@@ -95,7 +95,7 @@
           </div>
         </section>
 
-        <!-- ── Organizational Chart tab ───────────────────────────── -->
+        <!-- ── Organization Chart tab ───────────────────────────── -->
         <section class="tms-tab-panel" id="tab-panel-orgchart" style="display:none;" aria-label="Organization Chart">
           <div class="controls-inner">
             <div class="search-wrap">
@@ -199,10 +199,40 @@
   </div>
 </div>
 
+<!-- Directory: export choice modal -->
+<div id="dirx-modal-overlay" class="modal-overlay">
+  <div class="modal dirx-modal-content" role="dialog" aria-modal="true" aria-label="Choose a directory export">
+    <div class="modal-header-row">
+      <h2>Export Directory PDF</h2>
+      <button class="close-btn" id="dirx-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="dirx-options">
+      <button type="button" class="dirx-option" data-export="phone">
+        <span class="dirx-option-title">Staff Phone Directory</span>
+        <span class="dirx-option-desc">Photo, title, direct line, extension, email, and mobile for every staff member.</span>
+      </button>
+      <button type="button" class="dirx-option" data-export="direct-only">
+        <span class="dirx-option-title">Staff Phone Directory (Direct Dials Only)</span>
+        <span class="dirx-option-desc">A printable lobby poster — name and direct line only, scaled to one page.</span>
+      </button>
+      <button type="button" class="dirx-option" data-export="photo">
+        <span class="dirx-option-title">Staff Photo Directory</span>
+        <span class="dirx-option-desc">One page per department — large photo, name, title, and email.</span>
+      </button>
+      <button type="button" class="dirx-option" data-export="birthdays">
+        <span class="dirx-option-title">Staff Birthdays List</span>
+        <span class="dirx-option-desc">Just names and birthdays, alphabetical by last name.</span>
+      </button>
+    </div>
+    <div class="dirx-status" id="dirx-status" style="display:none;"></div>
+  </div>
+</div>
+
 <script src="common.js"></script>
 <script src="data.js"></script>
 <script src="schedule.js"></script>
 <script src="orgchart.js"></script>
+<script src="directory-exports.js"></script>
 <script src="tour.js"></script>
 <script src="app.js"></script>
 </body>

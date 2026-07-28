@@ -476,6 +476,17 @@ window.TMSOrgChart = (function () {
     label.textContent = 'Generating\u2026';
     icon.style.opacity = '.4';
 
+    // Exports must always include every staff member, regardless of any
+    // active search — temporarily clear it, rebuild unfiltered, export, then
+    // restore whatever the person had on screen.
+    const searchInput = document.getElementById('orgchart-search');
+    const savedQuery = orgSearchQuery;
+    const savedInputValue = searchInput.value;
+    orgSearchQuery = '';
+    searchInput.value = '';
+    renderOrgView();
+    buildPrintFrame();
+
     const frame = document.getElementById('print-frame');
     frame.style.position = 'relative';
     frame.style.left = '0';
@@ -495,6 +506,10 @@ window.TMSOrgChart = (function () {
       btn.disabled = false;
       label.textContent = 'Export PDF';
       icon.style.opacity = '';
+      orgSearchQuery = savedQuery;
+      searchInput.value = savedInputValue;
+      renderOrgView();
+      buildPrintFrame();
     }
 
     html2canvas(frame, {
@@ -542,7 +557,7 @@ window.TMSOrgChart = (function () {
     hdrRow.innerHTML =
       '<div class="page-header-left">' +
         '<img src="assets/tms-logo.png" alt="TMS" class="tms-logo-img" />' +
-        '<h1 class="page-title">' + esc(meta.shortName || 'TMS') + ' Staff Directory</h1>' +
+        '<h1 class="page-title">Staff Directory</h1>' +
       '</div>' +
       '<span class="page-meta">' + esc(window.TMS.dateStr || '') + '</span>';
     frame.appendChild(hdrRow);
@@ -666,7 +681,7 @@ window.TMSOrgChart = (function () {
       const y = margin;
       const imgData = canvas.toDataURL('image/jpeg', 0.93);
       pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
-      pdf.save('TMS-Staff-Directory.pdf');
+      pdf.save('TMS-Staff-Phone-Directory.pdf');
     }).catch((err) => {
       console.error('Directory PDF export failed:', err);
       restore();
@@ -731,7 +746,7 @@ window.TMSOrgChart = (function () {
     });
 
     document.getElementById('btn-export-pdf').addEventListener('click', exportPDF);
-    document.getElementById('btn-export-directory-pdf').addEventListener('click', exportDirectoryPDF);
+    document.getElementById('btn-export-directory-pdf').addEventListener('click', () => window.TMSDirectoryExports.openModal());
 
     document.getElementById('modal-overlay').addEventListener('click', function (e) {
       if (e.target === this) closeModal();
@@ -756,5 +771,10 @@ window.TMSOrgChart = (function () {
     });
   }
 
-  return { init, renderOrgTab, renderDirectoryTab, openProfileModal: openModal };
+  return {
+    init, renderOrgTab, renderDirectoryTab, openProfileModal: openModal,
+    exportPhoneDirectory: exportDirectoryPDF,
+    convertImagesForCapture,
+    people, depts,
+  };
 })();

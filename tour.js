@@ -19,7 +19,7 @@ window.TMSTour = (function () {
       tab: 'schedule',
       selector: '.tms-tabs',
       title: 'Welcome to TMS Staff Resources',
-      body: 'Everything staff-related lives in one place now, across three tabs: Work Schedules, Organizational Chart, and Directory. Let\u2019s walk through each.',
+      body: 'Everything staff-related lives in one place now, across three tabs: Work Schedules, Organization Chart, and Directory. Let\u2019s walk through each.',
     },
     {
       tab: 'schedule',
@@ -61,7 +61,7 @@ window.TMSTour = (function () {
     {
       tab: 'orgchart',
       selector: '.dept-grid .dept-block',
-      title: 'The Organizational Chart',
+      title: 'The Organization Chart',
       body: 'Departments are color-coded with reporting lines from department heads down through managers to staff. Search narrows the chart to matching names, titles, or emails.',
     },
     {
@@ -81,7 +81,7 @@ window.TMSTour = (function () {
       tab: 'directory',
       selector: '#btn-export-directory-pdf',
       title: 'Export the Directory',
-      body: 'Produces a single-page, portrait PDF listing every staff member alphabetically by last name, with photo, title, direct line, extension, email, and mobile.',
+      body: 'Opens a choice of four PDFs: the full Staff Phone Directory, a Direct-Dials-Only lobby poster, a Photo Directory organized by department, or a simple Staff Birthdays list.',
     },
     {
       tab: 'schedule',
