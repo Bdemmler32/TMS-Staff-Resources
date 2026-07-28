@@ -66,6 +66,7 @@
     initTabs();
     window.TMSOrgChart.init();
     window.TMSSchedule.init();
+    if (window.TMSTour) window.TMSTour.init(setActiveTab);
 
     window.TMSData.load(
       DATA_FILE,

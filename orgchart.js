@@ -256,8 +256,9 @@ window.TMSOrgChart = (function () {
         if (!members || members.length === 0) return;
         any = true;
         members.sort((a, b) => {
-          const d = (roleOrder[a.role] ?? 9) - (roleOrder[b.role] ?? 9);
-          return d !== 0 ? d : a.name.localeCompare(b.name);
+          if (a.role === 'dept_head' && b.role !== 'dept_head') return -1;
+          if (b.role === 'dept_head' && a.role !== 'dept_head') return 1;
+          return lastNameOf(a.name).localeCompare(lastNameOf(b.name)) || a.name.localeCompare(b.name);
         });
         const hdr = document.createElement('div');
         hdr.className = 'dir-dept-group-header';
@@ -443,6 +444,11 @@ window.TMSOrgChart = (function () {
       const clone = orgView.cloneNode(true);
       clone.style.display = '';
       clone.style.paddingTop = '0';
+      const deptGrid = clone.querySelector('.dept-grid');
+      if (deptGrid) {
+        const deptCount = Object.keys(depts()).filter((id) => id !== 'executive').length;
+        deptGrid.style.gridTemplateColumns = 'repeat(' + Math.max(deptCount, 1) + ', 1fr)';
+      }
       frame.appendChild(clone);
     }
   }
@@ -665,9 +671,19 @@ window.TMSOrgChart = (function () {
     if (!bar) return;
     const meta = (window.TMS.data && window.TMS.data.meta) || {};
     const parts = [];
-    if (meta.address) parts.push('<span class="org-contact-item">' + icoMapPin() + esc(meta.address) + '</span>');
+    if (meta.address) {
+      parts.push(
+        '<button type="button" class="org-contact-item org-contact-copy" data-copy="' + esc(meta.address) + '" ' +
+        'data-msg="Address copied to clipboard." title="Click to copy address">' + icoMapPin() + esc(meta.address) + '</button>'
+      );
+    }
     if (meta.phone) parts.push('<span class="org-contact-item">' + icoPhone() + '<a href="tel:' + esc(meta.phone) + '">' + esc(meta.phone) + '</a></span>');
-    if (meta.fax) parts.push('<span class="org-contact-item">' + icoFax() + esc(meta.fax) + '</span>');
+    if (meta.fax) {
+      parts.push(
+        '<button type="button" class="org-contact-item org-contact-copy" data-copy="' + esc(meta.fax) + '" ' +
+        'data-msg="Fax number copied to clipboard." title="Click to copy fax number">' + icoFax() + esc(meta.fax) + '</button>'
+      );
+    }
     if (meta.website) {
       const href = /^https?:\/\//i.test(meta.website) ? meta.website : 'https://' + meta.website;
       parts.push('<span class="org-contact-item">' + icoGlobe() + '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(meta.website) + '</a></span>');
@@ -675,6 +691,11 @@ window.TMSOrgChart = (function () {
     if (parts.length === 0) { bar.style.display = 'none'; return; }
     bar.style.display = '';
     bar.innerHTML = (meta.shortName ? '<strong>' + esc(meta.shortName) + '</strong>' : '') + parts.join('<span class="org-contact-sep">&middot;</span>');
+    bar.onclick = (e) => {
+      const btn = e.target.closest('.org-contact-copy');
+      if (!btn) return;
+      window.TMSCommon.copyToClipboard(btn.dataset.copy, btn.dataset.msg);
+    };
   }
 
   /* ── Public API ─────────────────────────────────────────────────── */

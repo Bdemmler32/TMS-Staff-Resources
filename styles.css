@@ -22,6 +22,16 @@
   --dept-orange: #d9622b;
   --dept-blue: #1f6fd9;
   --dept-pink: #c23b8a;
+
+  --loc-office-bg: #faece7;
+  --loc-office-border: #f0997b;
+  --loc-office-icon: #d85a30;
+  --loc-office-text: #4a1b0c;
+
+  --loc-remote-bg: #eeedfe;
+  --loc-remote-border: #afa9ec;
+  --loc-remote-icon: #534ab7;
+  --loc-remote-text: #26215c;
 }
 
 html { font-size: 16px; } /* 1rem = 16px baseline everywhere below */
@@ -175,12 +185,10 @@ a:focus-visible,
 .sched-row-alt .sched-cell { background: #fafafc; }
 .sched-col-name { padding: 0.6rem; display: flex; align-items: center; overflow: hidden; }
 .sched-col-day {
-  padding: 0.5rem 0.3rem; align-items: stretch; overflow: hidden;
+  padding: 0.5rem 0.3rem; align-items: center; overflow: hidden;
   display: flex; flex-direction: column; justify-content: center;
   gap: 0.2rem; border-left: 1px solid var(--line); container-type: inline-size;
 }
-.sched-cell.sched-today-col { background: #fdeceb; position: relative; }
-.sched-header-row .sched-cell.sched-today-col { background: #f8c9c9; }
 .sched-cell.sched-selected-col { background: #eaf1fd; position: relative; }
 .sched-header-row .sched-cell.sched-selected-col { background: #cfe0fb; }
 .sched-day-header-btn {
@@ -216,18 +224,31 @@ a:focus-visible,
   border: 1px solid var(--line); border-radius: 999px; padding: 0.2em 0.35em;
   font-weight: 600; color: var(--ink); box-sizing: border-box;
 }
-/* Only inside the Work Schedules grid does each pill get the full column
-   width (so pills stack one-per-row and text can shrink-to-fit reliably).
-   Everywhere else the class is reused (e.g. the two-week schedule modal),
-   pills stay their natural inline size instead of stretching full-width. */
-.sched-day-cell .time-pill { display: flex; width: 100%; }
+/* Grid pills size to their own content and center within the column (see
+   .sched-col-day). Font-size shrinking still works because it's measured
+   against the column container's width, not the pill's own width. */
+.sched-day-cell .time-pill { display: inline-flex; }
 .time-pill .loc-icon { width: 0.9em; height: 0.9em; flex-shrink: 0; color: var(--tms-red); }
+/* Modal-only: force the icon and text to the exact same box height (both
+   0.9rem) so flexbox align-items:center has two identical-height boxes to
+   center — no leftover mismatch from differing font line-box metrics. */
+.sched-modal-day-blocks .time-pill .loc-icon { width: 0.9rem; height: 0.9rem; }
+.time-pill.loc-office { background: var(--loc-office-bg); border-color: var(--loc-office-border); color: var(--loc-office-text); }
+.time-pill.loc-office .loc-icon { color: var(--loc-office-icon); }
+.time-pill.loc-remote { background: var(--loc-remote-bg); border-color: var(--loc-remote-border); color: var(--loc-remote-text); }
+.time-pill.loc-remote .loc-icon { color: var(--loc-remote-icon); }
 .time-pill-text {
   /* Base/default sizing — used wherever pills are reused outside the grid
      (e.g. the two-week schedule modal), where there's plenty of width and no
      sized container to measure cqw against. */
   font-size: 0.9375rem;
-  line-height: 1.25;
+  line-height: 1;
+}
+.sched-modal-day-blocks .time-pill-text {
+  /* Line-height forced to exactly match the icon's box height (0.9rem, see
+     above) so both flex children are the same height and align-items:center
+     has nothing left to misalign — more reliable than an approximate offset. */
+  line-height: 0.9rem;
 }
 /* Intentional exception to the 16px baseline, grid-only: sized relative to
    the actual day-column width (container query units, not viewport). Each
@@ -242,7 +263,9 @@ a:focus-visible,
   text-overflow: ellipsis;
   min-width: 0;
   flex: 1;
-  line-height: 1.2;
+  line-height: 1;
+  position: relative;
+  top: -0.05em;
 }
 
 .filter-results { margin-top: 0.75rem; font-size: 0.875rem; color: var(--ink-soft); text-align: center; }
@@ -344,12 +367,17 @@ a:focus-visible,
 .dir-controls { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
 .org-contact-bar {
   display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.8125rem; color: var(--ink-soft);
-  margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--line);
+  margin-bottom: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--line);
 }
 .org-contact-item { display: inline-flex; align-items: center; gap: 0.3em; }
 .org-contact-item svg { color: var(--tms-red); flex-shrink: 0; }
 .org-contact-item a { color: var(--focus); text-decoration: none; }
 .org-contact-item a:hover { text-decoration: underline; }
+button.org-contact-copy {
+  border: none; background: none; padding: 0; font: inherit; color: var(--focus);
+  cursor: pointer; font-family: 'Inter', sans-serif;
+}
+button.org-contact-copy:hover { text-decoration: underline; }
 .org-contact-sep { color: var(--line); }
 .dir-sort-label { font-size: 0.9375rem; font-weight: 600; color: var(--ink-soft); }
 .dir-sort-btns { display: flex; gap: 0.4rem; }
@@ -390,7 +418,7 @@ a:focus-visible,
   background: #fff; border-radius: 14px; max-width: 30rem; width: 100%; max-height: 88vh;
   overflow-y: auto; padding: 1.5rem; position: relative;
 }
-.sched-modal { max-width: 34rem; }
+.sched-modal { max-width: 42rem; }
 .filter-modal-content, .calendar-modal-content { max-width: 26rem; width: 100%; background: #fff; border-radius: 14px; padding: 1.5rem; }
 .modal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
 .modal-header-row h2 { font-size: 1.15rem; }
@@ -498,8 +526,48 @@ a:focus-visible,
 .tms-toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* ============================================================
-   RESPONSIVE
+   ONBOARDING TOUR
    ============================================================ */
+.tour-help-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.4rem; height: 1.4rem; border-radius: 50%; border: 1.5px solid var(--line);
+  background: #fff; color: var(--ink-soft); font-size: 0.8125rem; font-weight: 700;
+  font-family: 'Inter', sans-serif; cursor: pointer; margin-left: 0.35em; vertical-align: middle;
+}
+.tour-help-btn:hover { background: var(--bg-soft); color: var(--tms-red); border-color: var(--tms-red); }
+
+#tour-overlay {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+}
+#tour-overlay.open { display: block; }
+#tour-spotlight {
+  position: fixed; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(20, 20, 26, 0.68);
+  pointer-events: none; z-index: 2001;
+}
+#tour-tooltip {
+  position: fixed; z-index: 2002; width: 320px; max-width: calc(100vw - 24px);
+  background: #fff; border-radius: 14px; padding: 1.25rem; box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+}
+#tour-close {
+  position: absolute; top: 0.6rem; right: 0.6rem; border: none; background: var(--bg-soft);
+  width: 1.75rem; height: 1.75rem; border-radius: 50%; cursor: pointer; font-size: 0.9375rem; color: var(--ink-soft);
+}
+#tour-step-label { font-size: 0.75rem; font-weight: 700; color: var(--tms-red); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.4rem; }
+#tour-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; padding-right: 1.5rem; }
+#tour-body { font-size: 0.9375rem; color: var(--ink); line-height: 1.5; margin-bottom: 1rem; }
+#tour-dots { display: flex; gap: 0.3rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.tour-dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--line); }
+.tour-dot.active { background: var(--tms-red); width: 1rem; border-radius: 999px; }
+#tour-controls { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+#tour-skip { border: none; background: none; color: var(--ink-soft); font-size: 0.8125rem; cursor: pointer; text-decoration: underline; }
+#tour-nav-btns { display: flex; gap: 0.5rem; }
+#tour-back, #tour-next {
+  font-size: 0.875rem; font-weight: 600; border-radius: 999px; padding: 0.5em 1.1em; cursor: pointer;
+  border: 1.5px solid var(--line); background: #fff; color: var(--ink);
+}
+#tour-next { background: var(--tms-red); color: #fff; border-color: var(--tms-red); }
+#tour-next:hover { background: var(--tms-red-dark); }
+#tour-back:hover { background: var(--bg-soft); }
 @media (max-width: 640px) {
   .header-section { flex-direction: column; align-items: flex-start; }
   .sched-grid { grid-template-columns: 7rem repeat(5, 1fr); font-size: 0.8rem; }

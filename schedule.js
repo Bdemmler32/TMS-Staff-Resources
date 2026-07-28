@@ -76,8 +76,10 @@ window.TMSSchedule = (function () {
   }
 
   function pill(block) {
+    const key = (block.location || '').trim().toLowerCase();
+    const locClass = key === 'office' ? 'loc-office' : key === 'remote' ? 'loc-remote' : 'loc-other';
     return (
-      '<span class="time-pill" title="' + esc(block.location) + '">' +
+      '<span class="time-pill ' + locClass + '" title="' + esc(block.location) + '">' +
         locationIcon(block.location) +
         '<span class="time-pill-text">' + esc(block.start) + '\u2013' + esc(block.end) + '</span>' +
       '</span>'
@@ -131,8 +133,7 @@ window.TMSSchedule = (function () {
       cell.type = 'button';
       const isToday = d === todayDay;
       const isRef = d === refDay;
-      cell.className = 'sched-col-day sched-cell sched-day-header-btn' +
-        (isRef ? (isToday ? ' sched-today-col' : ' sched-selected-col') : '');
+      cell.className = 'sched-col-day sched-cell sched-day-header-btn' + (isRef ? ' sched-selected-col' : '');
       cell.setAttribute('aria-pressed', String(d === selectedCopyDay));
       cell.title = 'Click to set ' + d + ' as the day Copy Emails uses';
       const badgeText = isToday ? 'Today' : 'Selected';
@@ -185,10 +186,7 @@ window.TMSSchedule = (function () {
 
       DAYS.forEach((day) => {
         const cell = document.createElement('div');
-        const isToday = day === todayDay;
-        const isRef = day === refDay;
-        cell.className = 'sched-col-day sched-cell sched-day-cell' +
-          (isRef ? (isToday ? ' sched-today-col' : ' sched-selected-col') : '');
+        cell.className = 'sched-col-day sched-cell sched-day-cell';
         const blocks = dayBlocks(p, day);
         if (blocks.length === 0) {
           cell.innerHTML = '<span class="sched-off">\u2014</span>';
@@ -313,24 +311,8 @@ window.TMSSchedule = (function () {
       return;
     }
     const text = emails.join('; ');
-    const done = () => window.TMSCommon.showToast(
-      'Copied ' + emails.length + ' email address' + (emails.length === 1 ? '' : 'es') + ' for ' + dayLabel + '.'
-    );
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done).catch(() => {
-        window.TMSCommon.showToast('Could not copy to clipboard. Please try again.');
-      });
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); done(); }
-      catch (e) { window.TMSCommon.showToast('Could not copy to clipboard. Please try again.'); }
-      ta.remove();
-    }
+    const message = 'Copied ' + emails.length + ' email address' + (emails.length === 1 ? '' : 'es') + ' for ' + dayLabel + '.';
+    window.TMSCommon.copyToClipboard(text, message);
   }
 
   /* ── Filter modal ──────────────────────────────────────────────── */

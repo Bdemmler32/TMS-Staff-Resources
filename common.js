@@ -93,6 +93,23 @@ window.TMSCommon = (function () {
     return { display, hasNote };
   }
 
+  function copyToClipboard(text, successMessage) {
+    const done = () => showToast(successMessage);
+    const fail = () => showToast('Could not copy to clipboard. Please try again.');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { fail(); }
+      ta.remove();
+    }
+  }
+
   function lastNameOf(name) {
     const parts = String(name || '').trim().split(/\s+/);
     return parts.length > 1 ? parts[parts.length - 1] : parts[0];
@@ -139,6 +156,6 @@ window.TMSCommon = (function () {
 
   return {
     esc, initials, photoPath, makePhoto, makePlaceholder, lastNameOf, locationIcon, showToast,
-    MONTH_NAMES, parseBirthday, daysUntilBirthday, parsePhoneNote,
+    MONTH_NAMES, parseBirthday, daysUntilBirthday, parsePhoneNote, copyToClipboard,
   };
 })();
