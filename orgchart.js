@@ -397,10 +397,37 @@ window.TMSOrgChart = (function () {
   }
 
   /* ── Print frame + PDF export (Org Chart tab only) ─────────────── */
+  function convertImagesForCapture(frame) {
+    const imgs = frame.querySelectorAll('img:not(.tms-logo-img)');
+    const conversions = [];
+    imgs.forEach((img) => {
+      const div = document.createElement('div');
+      div.className = img.className;
+      const w = img.offsetWidth || parseInt(img.style.width, 10) || 32;
+      const h = img.offsetHeight || parseInt(img.style.height, 10) || 32;
+      div.style.width = w + 'px';
+      div.style.height = h + 'px';
+      div.style.borderRadius = '50%';
+      div.style.backgroundImage = 'url("' + img.src + '")';
+      div.style.backgroundSize = 'cover';
+      div.style.backgroundPosition = 'top center';
+      div.style.flexShrink = '0';
+      div.style.border = img.style.border || '1px solid rgba(0,0,0,0.1)';
+      div.style.boxSizing = 'border-box';
+      img.parentNode.insertBefore(div, img);
+      img.style.display = 'none';
+      conversions.push({ img, div });
+    });
+    return {
+      restore() { conversions.forEach(({ img, div }) => { img.style.display = ''; div.remove(); }); },
+    };
+  }
+
   function buildPrintFrame() {
     const frame = document.getElementById('print-frame');
     if (!frame) return;
     frame.innerHTML = '';
+    frame.className = '';
     const hdrRow = document.createElement('div');
     hdrRow.className = 'page-header-row';
     hdrRow.innerHTML =
@@ -435,29 +462,10 @@ window.TMSOrgChart = (function () {
     frame.style.visibility = 'visible';
     frame.style.width = '1400px';
 
-    const photoImgs = frame.querySelectorAll('img.staff-photo');
-    const conversions = [];
-    photoImgs.forEach((img) => {
-      const div = document.createElement('div');
-      div.className = img.className;
-      const w = img.offsetWidth || parseInt(img.style.width, 10) || 46;
-      const h = img.offsetHeight || parseInt(img.style.height, 10) || 46;
-      div.style.width = w + 'px';
-      div.style.height = h + 'px';
-      div.style.borderRadius = '50%';
-      div.style.backgroundImage = 'url("' + img.src + '")';
-      div.style.backgroundSize = 'cover';
-      div.style.backgroundPosition = 'top center';
-      div.style.flexShrink = '0';
-      div.style.border = img.style.border || '2px solid rgba(255,255,255,0.8)';
-      div.style.boxSizing = 'border-box';
-      img.parentNode.insertBefore(div, img);
-      img.style.display = 'none';
-      conversions.push({ img, div });
-    });
+    const { restore: restoreImgs } = convertImagesForCapture(frame);
 
     function restore() {
-      conversions.forEach(({ img, div }) => { img.style.display = ''; div.remove(); });
+      restoreImgs();
       frame.style.position = 'fixed';
       frame.style.left = '-19999px';
       frame.style.top = '-19999px';
@@ -501,14 +509,165 @@ window.TMSOrgChart = (function () {
     return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a14 14 0 010 18a14 14 0 010-18"/></svg>';
   }
 
+  function buildDirectoryPrintFrame() {
+    const frame = document.getElementById('print-frame');
+    if (!frame) return;
+    frame.innerHTML = '';
+    frame.className = 'dirprint-frame';
+
+    const meta = (window.TMS.data && window.TMS.data.meta) || {};
+    const hdrRow = document.createElement('div');
+    hdrRow.className = 'page-header-row';
+    hdrRow.innerHTML =
+      '<div class="page-header-left">' +
+        '<img src="assets/tms-logo.png" alt="TMS" class="tms-logo-img" />' +
+        '<h1 class="page-title">' + esc(meta.shortName || 'TMS') + ' Staff Directory</h1>' +
+      '</div>' +
+      '<span class="page-meta">' + esc(window.TMS.dateStr || '') + '</span>';
+    frame.appendChild(hdrRow);
+
+    const contactParts = [];
+    if (meta.address) contactParts.push('<span class="dirprint-contact-item">' + icoMapPin() + esc(meta.address) + '</span>');
+    if (meta.phone) contactParts.push('<span class="dirprint-contact-item">' + icoPhone() + esc(meta.phone) + '</span>');
+    if (meta.fax) contactParts.push('<span class="dirprint-contact-item">' + icoFax() + esc(meta.fax) + '</span>');
+    if (meta.website) contactParts.push('<span class="dirprint-contact-item">' + icoGlobe() + esc(meta.website) + '</span>');
+    if (contactParts.length) {
+      const contactLine = document.createElement('div');
+      contactLine.className = 'dirprint-contact-line';
+      contactLine.innerHTML = contactParts.join('<span class="dirprint-contact-sep">&middot;</span>');
+      frame.appendChild(contactLine);
+    }
+
+    const table = document.createElement('div');
+    table.className = 'dirprint-table';
+
+    const headerRow = document.createElement('div');
+    headerRow.className = 'dirprint-row dirprint-header-row';
+    headerRow.innerHTML =
+      '<div class="dirprint-col-photo"></div>' +
+      '<div class="dirprint-col-name">Name</div>' +
+      '<div class="dirprint-col-title">Title</div>' +
+      '<div class="dirprint-col-direct">Direct</div>' +
+      '<div class="dirprint-col-ext">Ext</div>' +
+      '<div class="dirprint-col-email">Email</div>' +
+      '<div class="dirprint-col-mobile">Mobile</div>';
+    table.appendChild(headerRow);
+
+    let anyNote = false;
+    const sorted = people().slice().sort((a, b) =>
+      a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName));
+
+    sorted.forEach((p) => {
+      const row = document.createElement('div');
+      row.className = 'dirprint-row';
+
+      const photoCell = document.createElement('div');
+      photoCell.className = 'dirprint-col-photo';
+      photoCell.appendChild(makePhoto(p, 'dirprint-photo'));
+      row.appendChild(photoCell);
+
+      const directInfo = window.TMSCommon.parsePhoneNote(p.direct);
+      const mobileInfo = window.TMSCommon.parsePhoneNote(p.mobile);
+      if (directInfo.hasNote || mobileInfo.hasNote) anyNote = true;
+
+      row.innerHTML +=
+        '<div class="dirprint-col-name">' + esc(p.lastName) + ', ' + esc(p.firstName) + '</div>' +
+        '<div class="dirprint-col-title">' + esc(p.title) + '</div>' +
+        '<div class="dirprint-col-direct">' + esc(directInfo.display) + (directInfo.hasNote ? '<sup>*</sup>' : '') + '</div>' +
+        '<div class="dirprint-col-ext">' + esc(p.ext) + '</div>' +
+        '<div class="dirprint-col-email">' + esc(p.email) + '</div>' +
+        '<div class="dirprint-col-mobile">' + (p.mobile ? esc(mobileInfo.display) + (mobileInfo.hasNote ? '<sup>*</sup>' : '') : '\u2014') + '</div>';
+
+      table.appendChild(row);
+    });
+
+    frame.appendChild(table);
+
+    if (anyNote) {
+      const note = document.createElement('div');
+      note.className = 'dirprint-footnote';
+      note.textContent = '* Text-Messaging only available during AM and MST.';
+      frame.appendChild(note);
+    }
+  }
+
+  function exportDirectoryPDF() {
+    const btn = document.getElementById('btn-export-directory-pdf');
+    const label = document.getElementById('export-directory-label');
+    const icon = document.getElementById('export-directory-icon');
+    btn.disabled = true;
+    label.textContent = 'Generating\u2026';
+    icon.style.opacity = '.4';
+
+    buildDirectoryPrintFrame();
+
+    const frame = document.getElementById('print-frame');
+    const frameWidth = 900;
+    frame.style.position = 'relative';
+    frame.style.left = '0';
+    frame.style.top = '0';
+    frame.style.visibility = 'visible';
+    frame.style.width = frameWidth + 'px';
+
+    const { restore: restoreImgs } = convertImagesForCapture(frame);
+
+    function restore() {
+      restoreImgs();
+      frame.style.position = 'fixed';
+      frame.style.left = '-19999px';
+      frame.style.top = '-19999px';
+      frame.style.visibility = 'hidden';
+      frame.style.width = '';
+      frame.className = '';
+      btn.disabled = false;
+      label.textContent = 'Export PDF';
+      icon.style.opacity = '';
+    }
+
+    html2canvas(frame, {
+      scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff',
+      width: frameWidth, windowWidth: frameWidth, logging: false,
+    }).then((canvas) => {
+      restore();
+      const { jsPDF } = window.jspdf;
+      // Single 8.5x11" portrait page — the whole directory is always scaled
+      // down to fit, never spans multiple pages.
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter' });
+      const margin = 0.4;
+      const useW = 8.5 - margin * 2;
+      const useH = 11 - margin * 2;
+      const canvasW = canvas.width / 2;
+      const canvasH = canvas.height / 2;
+      const ratio = Math.min(useW / (canvasW / 96), useH / (canvasH / 96));
+      const imgW = (canvasW / 96) * ratio;
+      const imgH = (canvasH / 96) * ratio;
+      const x = margin + (useW - imgW) / 2;
+      const y = margin;
+      const imgData = canvas.toDataURL('image/jpeg', 0.93);
+      pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
+      pdf.save('TMS-Staff-Directory.pdf');
+    }).catch((err) => {
+      console.error('Directory PDF export failed:', err);
+      restore();
+      alert('PDF export failed. Please try again.');
+    });
+  }
+
+  function icoMapPin() {
+    return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+  }
+  function icoFax() {
+    return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>';
+  }
+
   function renderOrgContactBar() {
     const bar = document.getElementById('directory-org-contact');
     if (!bar) return;
     const meta = (window.TMS.data && window.TMS.data.meta) || {};
     const parts = [];
-    if (meta.address) parts.push('<span class="org-contact-item">' + esc(meta.address) + '</span>');
+    if (meta.address) parts.push('<span class="org-contact-item">' + icoMapPin() + esc(meta.address) + '</span>');
     if (meta.phone) parts.push('<span class="org-contact-item">' + icoPhone() + '<a href="tel:' + esc(meta.phone) + '">' + esc(meta.phone) + '</a></span>');
-    if (meta.fax) parts.push('<span class="org-contact-item">Fax: ' + esc(meta.fax) + '</span>');
+    if (meta.fax) parts.push('<span class="org-contact-item">' + icoFax() + esc(meta.fax) + '</span>');
     if (meta.website) {
       const href = /^https?:\/\//i.test(meta.website) ? meta.website : 'https://' + meta.website;
       parts.push('<span class="org-contact-item">' + icoGlobe() + '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(meta.website) + '</a></span>');
@@ -536,6 +695,7 @@ window.TMSOrgChart = (function () {
     });
 
     document.getElementById('btn-export-pdf').addEventListener('click', exportPDF);
+    document.getElementById('btn-export-directory-pdf').addEventListener('click', exportDirectoryPDF);
 
     document.getElementById('modal-overlay').addEventListener('click', function (e) {
       if (e.target === this) closeModal();

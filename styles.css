@@ -449,9 +449,42 @@ a:focus-visible,
   background: #fff; padding: 1.25rem;
 }
 #print-frame .page-header-row { display: flex; align-items: center; gap: 0.875rem; margin-bottom: 1rem; }
+#print-frame .page-header-left { display: flex; align-items: center; gap: 0.75rem; }
+#print-frame .page-title { margin: 0; }
 #print-frame .tms-logo-img { height: 30px; }
 #print-frame .page-title { font-size: 1.25rem; font-weight: 700; }
 #print-frame .page-meta { margin-left: auto; font-size: 0.8125rem; color: var(--ink-soft); }
+
+.dirprint-contact-line {
+  font-size: 0.75rem; color: var(--ink-soft); margin: -0.4rem 0 0.9rem; padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+}
+.dirprint-contact-item { display: inline-flex; align-items: center; gap: 0.3em; }
+.dirprint-contact-item svg { color: var(--tms-red); flex-shrink: 0; }
+.dirprint-contact-sep { color: var(--line); }
+.dirprint-table { display: flex; flex-direction: column; }
+.dirprint-row {
+  display: grid;
+  grid-template-columns: 1.6rem 8rem 12rem 5rem 2.4rem 8rem 5rem;
+  gap: 0.5rem; align-items: flex-start; padding: 0.3rem 0; border-bottom: 1px solid #ececef;
+  font-size: 0.6875rem; color: var(--ink);
+}
+.dirprint-header-row {
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; font-size: 0.625rem;
+  color: var(--ink-soft); border-bottom: 1.5px solid var(--ink); padding-bottom: 0.35rem;
+  align-items: center;
+}
+.dirprint-col-photo, .dirprint-photo, .dirprint-photo.photo-unavailable {
+  width: 1.6rem; height: 1.6rem; border-radius: 50%; object-fit: cover;
+}
+.dirprint-photo.photo-unavailable { font-size: 0.55rem; }
+.dirprint-col-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dirprint-col-title { white-space: normal; overflow-wrap: break-word; line-height: 1.3; }
+.dirprint-col-email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dirprint-col-direct, .dirprint-col-ext, .dirprint-col-mobile { white-space: nowrap; }
+.dirprint-col-direct sup, .dirprint-col-mobile sup { color: var(--tms-red); }
+.dirprint-footnote { margin-top: 0.6rem; font-size: 0.625rem; color: var(--ink-soft); font-style: italic; }
 
 /* ============================================================
    TOAST NOTIFICATION

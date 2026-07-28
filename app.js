@@ -21,9 +21,9 @@
       btn.setAttribute('aria-selected', String(isActive));
     });
 
-    // Export PDF only ever applies to the Org Chart tab.
-    const exportBtn = document.getElementById('btn-export-pdf');
-    exportBtn.style.display = tabName === 'orgchart' ? '' : 'none';
+    // Export PDF buttons are each scoped to their own tab.
+    document.getElementById('btn-export-pdf').style.display = tabName === 'orgchart' ? '' : 'none';
+    document.getElementById('btn-export-directory-pdf').style.display = tabName === 'directory' ? '' : 'none';
 
     if (tabName === 'schedule') window.TMSSchedule.renderTab();
     if (tabName === 'orgchart') window.TMSOrgChart.renderOrgTab();
