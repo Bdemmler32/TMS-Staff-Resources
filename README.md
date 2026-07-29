@@ -1,8 +1,8 @@
-# TMS Staff Resources — v1.0
+# TMS Staff Resources — v0.35
 
-**One tool, three tabs: Work Schedules, Organizational Chart, and Directory — all reading from a single Excel workbook.**
+**One tool, three tabs: Work Schedules, Organization Chart, and Directory — all reading from a single Excel workbook.**
 
-This replaces the two previous standalone tools (`intranetSched` and `tms-org-chart`). It was rebuilt from scratch (not patched) to read the new merged data file, while keeping the look, feel, and interactions of both original tools.
+This replaced the two previous standalone tools (`intranetSched` and `tms-org-chart`), rebuilt from scratch rather than patched, and has grown substantially since. This README reflects the tool as of v0.35 — see [Version Note](#version-note) at the bottom for how versioning works going forward.
 
 ---
 
@@ -10,27 +10,29 @@ This replaces the two previous standalone tools (`intranetSched` and `tms-org-ch
 
 ```
 tms-staff-resources/
-├── index.html                    ← Entry point (all three tabs)
-├── styles.css                    ← All styling (16px+ base type, TMS red frame, dept colors)
-├── common.js                     ← Shared helpers (photo handling, icons, escaping)
+├── index.html                    ← Entry point (all three tabs, all modals)
+├── styles.css                    ← All styling
+├── common.js                     ← Shared helpers (photo handling, icons, toasts, clipboard copy)
 ├── data.js                       ← Loads & parses TMS_Staff_Resource_File.xlsx
 ├── schedule.js                   ← Work Schedules tab
-├── orgchart.js                   ← Organizational Chart tab + Directory tab
+├── orgchart.js                   ← Organization Chart tab + Directory tab + their PDF exports
+├── directory-exports.js          ← The Directory tab's other 3 PDF export options
+├── tour.js                       ← Onboarding tour (the ? icon next to the version number)
 ├── app.js                        ← Tab switching, expand/collapse shell, init
-├── TMS_Staff_Resource_File.xlsx  ← ⭐ All staff data — the only file you need to edit
+├── TMS_Staff_Resource_File.xlsx  ← ⭐ All staff data — the only file you should need to edit
 ├── assets/
 │   ├── tms-logo.png
-│   └── headshots/                ← Empty — add staff headshot JPGs here (see below)
+│   └── headshots/                ← Staff headshot JPGs (filenames must match the Photo column)
 └── README.md
 ```
 
-**Important:** like the previous tools, this loads the xlsx via `fetch`, so it must be served from a web server (`python -m http.server`, Apache, Nginx, S3, Netlify, etc.) — it will not work opened directly as a local file (`file://`).
+**Important:** this loads the xlsx via `fetch`, so it must be served from a web server (`python -m http.server`, Apache, Nginx, S3, Netlify, etc.) — it will not work opened directly as a local file (`file://`).
 
 ---
 
 ## The Data File
 
-Everything — org chart, directory, and schedules — comes from **one workbook**: `TMS_Staff_Resource_File.xlsx`. Keep it under that exact filename; the tool fetches it by name and doesn't look for anything date-stamped. When you get an updated file from HR/admin, just replace this one (same name) rather than adding a new dated copy.
+Everything in the tool — schedules, org chart, directory, and every PDF export — comes from **one workbook**: `TMS_Staff_Resource_File.xlsx`. Keep it under that exact filename; the tool fetches it by name. When you get an updated file, just replace this one (same name).
 
 ### Person sheets
 Each staff member has their own sheet (e.g. `Arbuckle, A`). Column C holds each value:
@@ -40,69 +42,74 @@ Each staff member has their own sheet (e.g. `Arbuckle, A`). Column C holds each 
 | 1 | First Name | |
 | 2 | Last Name | |
 | 3 | Title | |
-| 4 | Birthdate | Shown on profile cards/modals and usable for the Directory's Birthday sort |
-| 5 | Id | **Format: `LastName-FirstName`** (e.g. `Arbuckle-Alicia`). Must be unique. Used to link `Reporting` and to name the photo file. |
-| 6 | Direct | Direct phone number |
+| 4 | Birthdate | Shown on profile cards/modals; used for the Directory's Birthday sort and Photo Directory data |
+| 5 | Id | **Format: `LastName-FirstName`** (e.g. `Arbuckle-Alicia`). Must be unique. Links `Reporting` and names the photo file. |
+| 6 | Direct | Direct phone number. End with `*` (e.g. `724-814-3146*`) to show the text-messaging-hours footnote wherever this number appears. |
 | 7 | Ext | Phone extension |
-| 8 | Mobile | Mobile phone number — leave blank if none |
+| 8 | Mobile | Mobile number — leave blank if none. Same `*` convention as Direct. |
 | 9 | Email | |
-| 10 | Photo | Filename in `assets/headshots/` — leave blank if no photo |
+| 10 | Photo | Filename in `assets/headshots/` — leave blank if no photo (shows a "photo unavailable" placeholder instead) |
 | 11 | Dept ID | Must match an id in the Departments table on the Admin sheet |
 | 12 | Role | `executive`, `deputy`, `exec_staff`, `dept_head`, `manager`, or `staff` |
 | 13 | Reporting | The `Id` of this person's manager/supervisor |
 | 14 | Description | Optional bio shown in the profile modal |
 
-**Text-messaging note:** if a `Direct` or `Mobile` value ends in `*` (e.g. `724-814-3146*`), the tool strips the `*` from the displayed number and shows a footnote wherever that number appears: "Text-Messaging only available during AM and MST."
-
-Below that, the same sheet has the two-week schedule grid (unchanged from the original Work Schedules form — Work Blocks 1–5 per day, Week 1 and Week 2).
+Below that, the same sheet has the two-week schedule grid (Work Blocks 1–5 per day, Week 1 and Week 2 — unchanged from the original Work Schedules form).
 
 ### Admin sheet
 - **Departments table**: `id` / `name` / `color` per department. Available colors: `exec` (red), `yellow`, `green`, `orange`, `blue`, `pink`.
-- **Meta table**: organization name, address, phone, fax, website, version.
-- **Last Updated**: shown in the header of the tool.
+- **Meta table**: `shortName`, `address`, `phone`, `fax`, `website`, `version`. The `version` value here is what displays as the version badge in the app header and drives the filename convention below.
+- **Last Updated**: shown throughout the tool and in PDF exports.
 
 ### FormTools sheet
-Reference/dropdown data for the fill-in-your-own-schedule form. Not read by this display tool — leave as-is.
+Reference/dropdown data for the fill-in-your-own-schedule form. Not read by this display tool.
 
 ---
 
 ## Adding Staff Photos
 
-1. Drop the JPG into `assets/headshots/`.
-2. Make sure the filename **exactly matches** the `Photo` column value for that person in the workbook (e.g. `ArbuckleAlicia.jpg`).
-3. Anyone whose photo file isn't present yet (or fails to load) automatically shows a clearly-labeled "photo unavailable" placeholder (initials + a small icon) instead of a broken image or a photo that could be mistaken for a real one.
-
----
+Drop a JPG into `assets/headshots/` with a filename that **exactly matches** the `Photo` column value for that person (e.g. `ArbuckleAlicia.jpg`). Anyone whose photo file is missing or fails to load automatically shows a "photo unavailable" placeholder (initials + icon) instead of a broken image.
 
 ## Adding / Removing / Changing Staff
 
-- **Add:** duplicate an existing person sheet, rename the tab, fill in all the fields, and add their headshot.
-- **Remove:** delete their sheet. If they were a `manager`, their reports automatically fall back to showing as direct department members in the Org Chart.
-- **Reassign / promote:** update `Dept ID`, `Role`, and `Reporting` as needed — no code changes required.
+- **Add:** duplicate an existing person sheet, rename the tab, fill in all fields, add their headshot.
+- **Remove:** delete their sheet. If they were a `manager`, their reports fall back to showing as direct department members in the Org Chart.
+- **Reassign/promote:** update `Dept ID`, `Role`, and `Reporting` — no code changes required.
 - **New department:** add a row to the Departments table on the Admin sheet, then set staff `Dept ID` to match.
 
 ---
 
 ## Features by Tab
 
-**Work Schedules** — functions exactly as the original standalone tool did: browse the current biweekly pay-period schedule, navigate week-to-week, jump to any date via the calendar picker, filter to specific staff or office-hours-only, and click any name for their full two-week schedule.
+### Work Schedules
+Browse the current biweekly pay-period schedule; navigate week-to-week or jump to any date via the calendar picker; filter to specific staff or Office-Hours-Only (hides anyone with zero in-office hours that week); Today's column is highlighted automatically, and clicking any day header (or the Staff header, for everyone regardless of day) changes which day **Copy Emails** uses. Copy Emails copies the addresses of everyone currently shown with hours on the selected reference day, ready to paste into Outlook, with a confirmation toast. Click a staff photo to open their profile; click their name to jump straight to their two-week schedule. Office/Remote time blocks are color-coded (coral/purple) with distinct icons.
 
-**Organizational Chart** — hierarchical, color-coded by department, with manager/report indentation and live search. **Export PDF** (top-right, only shown on this tab) renders a single 11×8.5" landscape page with the chart scaled to fit — it never spans multiple pages.
+### Organization Chart
+Hierarchical, color-coded by department, with manager/report indentation and live search. **Export PDF** renders a single scaled-to-fit landscape page — it always clears any active search first so the export includes everyone, then restores your search afterward.
 
-**Directory** — card grid of all staff, sortable by Role, A–Z (last name), or Department, with live search.
+### Directory
+Card grid of all staff, sortable by A–Z (default), Role, Department, or upcoming Birthday, with live search and a contact bar (address/phone/fax/website — address and fax are click-to-copy). **Export PDF** opens a choice of four PDFs:
 
-All three tabs share one profile modal (click any staff card/name in Org Chart or Directory) showing photo, title, department, extension, direct line, email, and bio.
+1. **Staff Phone Directory** — full detail (photo, title, direct, ext, email, mobile), alphabetical by last name.
+2. **Staff Phone Directory (Direct Dials Only)** — a printable lobby-poster (single page, scaled to fill it), name + direct line only, two columns, with your Visitors/Deliveries signage text.
+3. **Staff Photo Directory** — one page per department (Executive always first, then the rest alphabetically), large photo + name + title + email per card. If a department doesn't fit on one page, it spills onto additional pages labeled "(Continued.)".
+4. **Staff Birthdays List** — just names and birthdays, alphabetical by last name.
+
+All exports pull the complete staff list directly regardless of any active Directory search.
+
+---
+
+## Onboarding Tour
+
+Click the **?** icon next to the version badge in the header to replay a 12-step guided tour. It's a live spotlight walkthrough — it highlights real elements on the page and switches tabs automatically as needed, rather than showing static screenshots.
 
 ---
 
 ## Accessibility
 
-- Base font size is 16px (1rem) throughout, per EAA/WCAG guidance.
+- Base font size is 16px throughout, with one flagged exception: schedule-grid time-pill text, which is deliberately allowed to scale down (via container queries) so a full time range always fits on one line rather than wrapping or truncating.
 - All interactive elements have a visible focus outline.
-- Work-location values (Office/Remote/Travel/PTO) are shown as an icon inside each time pill rather than repeated text, keeping schedule rows compact at the larger type size.
 - Photo placeholders and icons carry `alt`/`aria-label` text; modals use `aria-modal` and return focus to the close button on open.
-
-This is a first accessibility pass — flag anything that still needs attention (contrast, specific screen-reader behavior, keyboard-only walkthroughs) and we can tighten further.
 
 ---
 
@@ -121,4 +128,12 @@ This is a first accessibility pass — flag anything that still needs attention 
 
 ---
 
-*TMS — The Minerals, Metals & Materials Society | tms.org | v1.0*
+## Version Note
+
+The **in-app version badge** always reflects the `version` value on the workbook's Admin > Meta sheet — update it there when you update staff data, and the app picks it up automatically.
+
+The **delivered package filename** is a separate, sequential thing: starting with this delivery, each package zip is named with its version number (e.g. `tms-staff-resources-v0.35.zip`), incrementing with each round of changes, so you can tell deliveries apart at a glance without opening them.
+
+---
+
+*TMS — The Minerals, Metals & Materials Society | tms.org | v0.35*
